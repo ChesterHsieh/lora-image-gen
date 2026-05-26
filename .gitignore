@@ -1,0 +1,32 @@
+# 訓練資料與產出（大檔，不入版控）
+datasets/**
+!datasets/.gitkeep
+outputs/**
+!outputs/.gitkeep
+
+# 資料準備的工作目錄（大量圖片 + 個人整理的 csv，不入版控）
+dataset_prep/raw_cards/
+dataset_prep/cropped/
+dataset_prep/cards.csv
+
+# 模型權重
+*.safetensors
+*.ckpt
+*.pt
+*.bin
+
+# 機密 / 環境設定（含 API key、rclone token），只提交範本
+.env
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# 測試 / 覆蓋率產物
+.pytest_cache/
+.coverage
+htmlcov/

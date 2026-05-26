@@ -1,0 +1,4 @@
+# RunPod 訓練 launcher 的本機相依。
+# 裝進 lora-image-gen 既有的 uv venv：
+#   uv pip install -r runpod/requirements.txt
+runpod>=1.7.0

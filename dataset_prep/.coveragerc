@@ -1,0 +1,7 @@
+[run]
+source = crop_cards,make_captions
+
+[report]
+exclude_lines =
+    if __name__ == .__main__.:
+show_missing = True
