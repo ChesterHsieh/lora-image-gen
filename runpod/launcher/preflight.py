@@ -7,11 +7,10 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
+from . import check_dataset
 from .config import ConfigError, load_config
-from .uploader import DatasetError, validate_dataset
 
 OK = "✅"
 BAD = "❌"
@@ -75,15 +74,13 @@ def _check_rclone(cfg) -> bool:
     return True
 
 
-def _check_dataset(dataset: Path) -> bool:
+def _check_dataset(dataset: Path, trigger: str, min_images: int) -> bool:
     print(f"\n[4/4] 訓練資料集 {dataset}")
-    try:
-        summary = validate_dataset(dataset)
-    except DatasetError as exc:
-        print(f"  {BAD} {exc}")
+    report = check_dataset.check(dataset, trigger=trigger, min_images=min_images)
+    check_dataset.print_report(report)
+    if not report.ok:
         print("     → 圖片放 dataset_prep/，跑 crop_cards.py 裁切、make_captions.py 產同名 .txt caption")
         return False
-    print(f"  {OK} {summary.image_count} 組成對的圖 + 同名 .txt caption")
     print("     提醒：圖為小尺寸插圖時，訓練用 bucket（train_lora.sh 已處理）；要更精緻可先 upscale 到 1024")
     return True
 
@@ -92,6 +89,10 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="訓練前就緒檢查")
     parser.add_argument("--env", type=Path, default=Path(".env"))
     parser.add_argument("--dataset", type=Path, default=Path("../dataset_prep/cropped"))
+    parser.add_argument("--trigger", default=check_dataset.DEFAULT_TRIGGER,
+                        help=f"caption 該以哪個觸發詞開頭（預設 {check_dataset.DEFAULT_TRIGGER}）")
+    parser.add_argument("--min-images", type=int, default=check_dataset.DEFAULT_MIN_IMAGES,
+                        help=f"成對圖低於此數出警告（預設 {check_dataset.DEFAULT_MIN_IMAGES}）")
     args = parser.parse_args(argv)
 
     print("=== RunPod LoRA 訓練：就緒檢查 ===")
@@ -100,7 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     if ok_cfg:
         results.append(_check_runpod_api(cfg))
         results.append(_check_rclone(cfg))
-    results.append(_check_dataset(args.dataset))
+    results.append(_check_dataset(args.dataset, args.trigger, args.min_images))
 
     print("\n=== 結果 ===")
     if all(results):
