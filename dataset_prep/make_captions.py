@@ -6,19 +6,19 @@
   - caption 不描述「畫風」→ 把「怎麼畫」留給 LoRA 學，這才是風格綁定的來源。
   - 每張 caption 開頭加一個觸發詞（模型不認識的字），用來召喚風格。
 
-來源用一份 CSV（你從 wiki 整理）：
+來源用一份 CSV（你自己整理）：
     filename,description
     apple.png,a red apple
     villager.png,a villager standing
     house.png,a wooden house
 
 工具會：
-  1. 把 wiki 描述裡常見的「風格形容詞」自動剝除（flat, cute, cartoon, crayon...），
+  1. 把描述裡常見的「風格形容詞」自動剝除（flat, cute, cartoon, crayon...），
      避免不小心把畫風寫進 caption。
   2. 在前面加觸發詞，輸出與圖同名的 .txt（kohya / ComfyUI 通用格式）。
 
 用法：
-    python make_captions.py --images cropped --csv cards.csv --trigger stcklnd
+    python make_captions.py --images cropped --csv cards.csv --trigger mystyle
 """
 from __future__ import annotations
 
@@ -35,7 +35,6 @@ STYLE_WORDS = {
     "minimalistic", "simple", "childish", "childlike", "hand-drawn", "handdrawn",
     "illustration", "illustrated", "drawing", "drawn", "sketch", "stylized",
     "vector", "pixel", "painterly", "colorful", "bright", "cheerful", "whimsical",
-    "stacklands", "card", "icon",
 }
 
 IMG_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
@@ -82,8 +81,8 @@ def main() -> int:
     parser.add_argument("--images", type=Path, required=True, help="裁好的插圖資料夾")
     parser.add_argument("--csv", type=Path, required=True,
                         help="卡名→描述對照表（表頭 filename,description）")
-    parser.add_argument("--trigger", default="stcklnd",
-                        help="觸發詞，建議用模型不認識的字（預設 stcklnd）")
+    parser.add_argument("--trigger", default="mystyle",
+                        help="觸發詞，建議用模型不認識的字（預設 mystyle）")
     parser.add_argument("--keep-style-words", action="store_true",
                         help="不剝除風格形容詞（預設會剝，除非你很清楚自己在做什麼）")
     parser.add_argument("--dry-run", action="store_true", help="只印出不寫檔")

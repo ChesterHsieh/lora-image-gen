@@ -1,9 +1,9 @@
 ---
 name: run-lora-image-gen
-description: Run / launch / train the Stacklands-style SDXL LoRA on RunPod GPU, end to end — find & grab a GPU, preflight-check setup (RunPod API key, rclone→Google Drive, dataset), train the LoRA, sync results to Google Drive, and open the remote ComfyUI to try the trained LoRA. Use when asked to train the LoRA, run a RunPod GPU job, grab/rent a GPU, check what's not set up yet, or screenshot/open the ComfyUI to test generated images.
+description: Run / launch / train a style SDXL LoRA on RunPod GPU, end to end — find & grab a GPU, preflight-check setup (RunPod API key, rclone→Google Drive, dataset), train the LoRA, sync results to Google Drive, and open the remote ComfyUI to try the trained LoRA. Use when asked to train the LoRA, run a RunPod GPU job, grab/rent a GPU, check what's not set up yet, or screenshot/open the ComfyUI to test generated images.
 ---
 
-# Run: lora-image-gen (Stacklands LoRA on RunPod)
+# Run: lora-image-gen (style LoRA on RunPod)
 
 Train an SDXL LoRA on a **remote RunPod GPU**, sync the result to **Google
 Drive**, and drive the **remote ComfyUI** to try it. There is no local GPU
@@ -63,7 +63,7 @@ PY
 ```
 Set `RUNPOD_CLOUD_TYPE=SECURE`. Training dataset = `dataset_prep/cropped/`
 (paired `*.png` + same-name `*.txt` caption; produced by
-`dataset_prep/crop_cards.py` + `make_captions.py`, trigger word `stcklnd`).
+`dataset_prep/crop_cards.py` + `make_captions.py`, default trigger word `mystyle`).
 
 ## Run (agent path)
 
@@ -86,7 +86,11 @@ cd runpod
 ../.venv/bin/python -m launcher.preflight --env .env --dataset ../dataset_prep/cropped
 ```
 Checks RunPod API key + volume, rclone→Drive config, and dataset; prints a
-fix hint for each `❌`. Proceed only when it says "全部就緒".
+fix hint for each `❌`. Proceed only when it says "全部就緒". The dataset
+slice ([4/4]) is the `launcher.check_dataset` module — it errors on missing /
+empty captions and warns on too-few images, orphan files, or captions not
+starting with the trigger. To check just the data without touching RunPod, use
+the [/check-dataset](../check-dataset/SKILL.md) skill (same logic, stand-alone).
 
 ### 3. Train (launch → train → sync to Drive → recycle)
 
@@ -158,12 +162,6 @@ prompt (keep the `stcklnd,` trigger), Run. Output images land in
   one of the Gotchas above (CUDA/sm, image size, missing module).
 - Forgot which pod is billing → `runpodctl get pod` or RunPod Console;
   recycle with `runpod.terminate_pod('<id>')` (the launcher prints the id).
-
-## Tests
-
-```bash
-cd runpod/launcher && ../../.venv/bin/python -m pytest -q   # 57 unit tests (mocked)
-```
 
 ## The drivers (committed)
 
